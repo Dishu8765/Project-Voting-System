@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SecureVote Admin Dashboard — Election officials control panel for real-time vote monitoring and audit.">
+  <title>SecureVote — Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- ================================================================
+     LOGIN SCREEN
+     ================================================================ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
+      <span class="login-logo-text">SecureVote</span>
+    </div>
+    <h1 class="login-title">Admin Login</h1>
+    <p class="login-subtitle">Election Officials Portal — Authorised Access Only</p>
+
+    <form id="login-form" autocomplete="off" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="admin-username">Username</label>
+        <input
+          id="admin-username"
+          type="text"
+          class="form-input"
+          placeholder="admin"
+          autocomplete="username"
+          required
+        >
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="admin-password">Password</label>
+        <input
+          id="admin-password"
+          type="password"
+          class="form-input"
+          placeholder="••••••••"
+          autocomplete="current-password"
+          required
+        >
+      </div>
+
+      <div id="login-alert" class="alert alert-error" role="alert" aria-live="polite"></div>
+
+      <button type="submit" id="login-btn" class="btn btn-primary btn-full" style="margin-top:1.25rem;">
+        <span id="login-spinner" class="spinner"></span>
+        <span id="login-btn-text">Sign In</span>
+      </button>
+    </form>
+
+    <p style="text-align:center;margin-top:1.5rem;font-size:0.75rem;color:var(--text-muted);">
+      Default credentials: <strong style="color:var(--text-secondary)">admin / admin123</strong>
+    </p>
+  </div>
+</div>
+
+<!-- ================================================================
+     DASHBOARD SCREEN
+     ================================================================ -->
+<div id="dashboard-screen">
+
+  <!-- Topbar -->
+  <header class="topbar" role="banner">
+    <div class="topbar-brand">
+      <div class="topbar-brand-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </div>
+      SecureVote Admin
+    </div>
+    <div class="topbar-right">
+      <div class="refresh-indicator">
+        <div class="dot dot-green"></div>
+        <span id="last-refresh-time">Live</span>
+      </div>
+      <div class="topbar-user">
+        <div class="topbar-user-badge" id="topbar-user-initial">A</div>
+        <span id="topbar-username">admin</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="logout-btn">Sign Out</button>
+    </div>
+  </header>
+
+  <!-- Tab Navigation -->
+  <nav class="tab-nav" role="tablist" aria-label="Dashboard sections">
+    <button class="tab-btn active" id="tab-overview-btn" role="tab" aria-selected="true"  aria-controls="panel-overview"  data-tab="overview">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Overview
+    </button>
+    <button class="tab-btn" id="tab-results-btn" role="tab" aria-selected="false" aria-controls="panel-results"  data-tab="results">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Live Results
+    </button>
+    <button class="tab-btn" id="tab-audit-btn" role="tab" aria-selected="false"  aria-controls="panel-audit"    data-tab="audit">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Audit Log
+    </button>
+    <button class="tab-btn" id="tab-verify-btn" role="tab" aria-selected="false"  aria-controls="panel-verify"   data-tab="verify">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Verify Receipt
+    </button>
+    <button class="tab-btn" id="tab-blockchain-btn" role="tab" aria-selected="false" aria-controls="panel-blockchain" data-tab="blockchain">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      Blockchain
+    </button>
+    <button class="tab-btn" id="tab-finalize-btn" role="tab" aria-selected="false" aria-controls="panel-finalize" data-tab="finalize">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      Finalize
+    </button>
+  </nav>
+
+  <!-- Dashboard Content -->
+  <main class="dashboard-content" id="main-content">
+
+    <!-- ── OVERVIEW TAB ─────────────────────────────────────────── -->
+    <section id="panel-overview" class="tab-panel active" role="tabpanel" aria-labelledby="tab-overview-btn">
+      <div class="stats-grid" id="overview-stats">
+        <div class="stat-card">
+          <div class="stat-label">Total Votes Cast</div>
+          <div class="stat-value stat-accent" id="stat-votes">—</div>
+          <div class="stat-sub">Recorded on blockchain</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Registered Voters</div>
+          <div class="stat-value stat-purple" id="stat-registered">—</div>
+          <div class="stat-sub">Eligible to vote</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Voter Turnout</div>
+          <div class="stat-value stat-success" id="stat-turnout">—%</div>
+          <div class="stat-sub">Of registered voters</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Election Status</div>
+          <div class="stat-value" id="stat-status" style="font-size:1.5rem">—</div>
+          <div class="stat-sub" id="stat-status-sub"></div>
+        </div>
+      </div>
+
+      <!-- Mini results preview -->
+      <h2 class="section-title">
+        <svg class="section-title-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Current Standing
+      </h2>
+      <div class="table-wrapper">
+        <table id="overview-table" aria-label="Current vote tally">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Candidate</th>
+              <th>Party</th>
+              <th>Office</th>
+              <th>Votes</th>
+              <th class="bar-cell">Distribution</th>
+            </tr>
+          </thead>
+          <tbody id="overview-tbody">
+            <tr><td colspan="6" class="empty-state"><div class="empty-state-text">Loading…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="last-updated">Last updated: <span id="overview-updated">—</span></div>
+    </section>
+
+    <!-- ── LIVE RESULTS TAB ─────────────────────────────────────── -->
+    <section id="panel-results" class="tab-panel" role="tabpanel" aria-labelledby="tab-results-btn">
+      <h2 class="section-title">Live Vote Results</h2>
+      <div class="table-wrapper">
+        <table id="results-table" aria-label="Full vote results">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Candidate</th>
+              <th>Party</th>
+              <th>Office</th>
+              <th>Votes</th>
+              <th>Percentage</th>
+              <th class="bar-cell">Chart</th>
+            </tr>
+          </thead>
+          <tbody id="results-tbody">
+            <tr><td colspan="7" class="empty-state"><div class="empty-state-text">Loading…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── AUDIT LOG TAB ────────────────────────────────────────── -->
+    <section id="panel-audit" class="tab-panel" role="tabpanel" aria-labelledby="tab-audit-btn">
+      <div class="audit-controls">
+        <input
+          type="text"
+          id="audit-search"
+          class="search-input"
+          placeholder="Filter by tx hash, candidate, or confirmation code…"
+          aria-label="Search audit log"
+        >
+        <button class="btn btn-ghost btn-sm" id="audit-refresh-btn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.96"/></svg>
+          Refresh
+        </button>
+        <span class="last-updated" id="audit-count-label">Loading…</span>
+      </div>
+
+      <div class="table-wrapper">
+        <table id="audit-table" aria-label="Blockchain audit log">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Voter ID</th>
+              <th>Candidate</th>
+              <th>Party</th>
+              <th>Confirmation Code</th>
+              <th>Blockchain Tx Hash</th>
+              <th>Block</th>
+              <th>Submitted At</th>
+            </tr>
+          </thead>
+          <tbody id="audit-tbody">
+            <tr><td colspan="8" class="empty-state"><div class="empty-state-text">Loading audit log…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── VERIFY RECEIPT TAB ───────────────────────────────────── -->
+    <section id="panel-verify" class="tab-panel" role="tabpanel" aria-labelledby="tab-verify-btn">
+      <h2 class="section-title">Verify Voter Receipt</h2>
+      <p style="color:var(--text-secondary);font-size:0.875rem;margin-bottom:1rem;">
+        Enter a blockchain transaction hash to verify a voter's receipt and confirm it is recorded on-chain.
+      </p>
+
+      <div class="verify-box">
+        <label class="form-label" for="verify-tx-input">Blockchain Transaction Hash</label>
+        <div class="verify-row">
+          <input
+            id="verify-tx-input"
+            type="text"
+            class="form-input"
+            placeholder="0x1234abcd…"
+            aria-label="Transaction hash to verify"
+          >
+          <button class="btn btn-primary" id="verify-btn">
+            <span id="verify-spinner" class="spinner"></span>
+            Verify
+          </button>
+        </div>
+        <div id="verify-alert" class="alert" role="alert" aria-live="polite"></div>
+
+        <div id="verify-result" class="verify-result" aria-live="polite">
+          <div style="margin-bottom:0.75rem;display:flex;align-items:center;gap:0.5rem;">
+            <div class="dot dot-green"></div>
+            <strong style="color:var(--success)">Vote Verified on Blockchain</strong>
+          </div>
+          <div class="verify-field">
+            <span class="verify-key">Transaction Hash</span>
+            <span class="verify-val mono" id="vr-tx-hash">—</span>
+          </div>
+          <div class="verify-field">
+            <span class="verify-key">Vote Hash</span>
+            <span class="verify-val mono" id="vr-vote-hash">—</span>
+          </div>
+          <div class="verify-field">
+            <span class="verify-key">Candidate</span>
+            <span class="verify-val" id="vr-candidate">—</span>
+          </div>
+          <div class="verify-field">
+            <span class="verify-key">Party</span>
+            <span class="verify-val" id="vr-party">—</span>
+          </div>
+          <div class="verify-field">
+            <span class="verify-key">Office</span>
+            <span class="verify-val" id="vr-office">—</span>
+          </div>
+          <div class="verify-field">
+            <span class="verify-key">Voter ID</span>
+            <span class="verify-val mono" id="vr-voter-id">—</span>
+          </div>
+          <div class="verify-field">
+            <span class="verify-key">Confirmation Code</span>
+            <span class="verify-val mono" id="vr-confirm-code">—</span>
+          </div>
+          <div class="verify-field">
+            <span class="verify-key">Block Number</span>
+            <span class="verify-val" id="vr-block">—</span>
+          </div>
+          <div class="verify-field">
+            <span class="verify-key">Submitted At</span>
+            <span class="verify-val" id="vr-submitted-at">—</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── BLOCKCHAIN STATUS TAB ────────────────────────────────── -->
+    <section id="panel-blockchain" class="tab-panel" role="tabpanel" aria-labelledby="tab-blockchain-btn">
+      <h2 class="section-title">Blockchain Status</h2>
+
+      <div class="status-grid">
+        <div class="status-card">
+          <div class="status-card-header">
+            <span class="status-card-title">Connection</span>
+            <div class="status-indicator" id="bc-connection-badge">
+              <div class="dot dot-yellow"></div> Checking…
+            </div>
+          </div>
+          <div class="status-value" id="bc-provider">—</div>
+          <div class="status-detail" id="bc-node-url">—</div>
+        </div>
+        <div class="status-card">
+          <div class="status-card-header">
+            <span class="status-card-title">Current Block</span>
+          </div>
+          <div class="status-value stat-accent" id="bc-block-number">—</div>
+          <div class="status-detail">Network ID: <span id="bc-network-id">—</span></div>
+        </div>
+        <div class="status-card">
+          <div class="status-card-header">
+            <span class="status-card-title">Smart Contract</span>
+          </div>
+          <div class="status-value" id="bc-contract-status" style="font-size:1rem">—</div>
+          <div class="status-detail" id="bc-contract-address">No contract deployed</div>
+        </div>
+        <div class="status-card">
+          <div class="status-card-header">
+            <span class="status-card-title">Accounts Available</span>
+          </div>
+          <div class="status-value stat-success" id="bc-accounts">—</div>
+          <div class="status-detail" id="bc-checked-at">—</div>
+        </div>
+      </div>
+
+      <h2 class="section-title" style="margin-top:1rem;">Ganache Accounts</h2>
+      <div class="table-wrapper">
+        <table aria-label="Ganache accounts">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Address</th>
+              <th>Role</th>
+            </tr>
+          </thead>
+          <tbody id="accounts-tbody">
+            <tr><td colspan="3" class="empty-state"><div class="empty-state-text">Loading…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── FINALIZE TAB ─────────────────────────────────────────── -->
+    <section id="panel-finalize" class="tab-panel" role="tabpanel" aria-labelledby="tab-finalize-btn">
+      <h2 class="section-title">Finalize Election</h2>
+
+      <div class="finalize-box" id="finalize-box">
+        <div class="finalize-warning">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span>
+            <strong>Warning — This action is irreversible.</strong><br>
+            Finalizing the election will prevent any further votes from being recorded. The blockchain tally will be sealed. This cannot be undone.
+          </span>
+        </div>
+
+        <div style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+          <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem;min-width:160px;">
+            <div style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;margin-bottom:0.25rem;">VOTES CAST</div>
+            <div style="font-size:2rem;font-weight:700;color:var(--accent)" id="fin-vote-count">—</div>
+          </div>
+          <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem;min-width:160px;">
+            <div style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;margin-bottom:0.25rem;">TURNOUT</div>
+            <div style="font-size:2rem;font-weight:700;color:var(--success)" id="fin-turnout">—</div>
+          </div>
+          <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem;min-width:160px;">
+            <div style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;margin-bottom:0.25rem;">STATUS</div>
+            <div style="font-size:1.25rem;font-weight:700;" id="fin-current-status">—</div>
+          </div>
+        </div>
+
+        <button class="btn btn-danger" id="finalize-btn" style="font-size:1rem;padding:0.75rem 2rem;">
+          <span id="finalize-spinner" class="spinner"></span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          End Election &amp; Seal Blockchain Tally
+        </button>
+
+        <div id="finalize-result" class="finalize-status-bar">
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+            <div class="dot dot-green"></div>
+            <strong style="color:var(--success)" id="finalize-result-title">Election Finalized</strong>
+          </div>
+          <div style="font-size:0.875rem;color:var(--text-secondary)" id="finalize-result-details"></div>
+        </div>
+
+        <div id="finalize-alert" class="alert" role="alert" aria-live="polite" style="margin-top:1rem;"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ================================================================
+     JAVASCRIPT
+     ================================================================ -->
+<script>
+'use strict';
+
+// ── Configuration ─────────────────────────────────────────────────
+const API_BASE = 'http://localhost:3000/api';
+const TALLY_REFRESH_MS = 10000;   // 10 seconds
+const BLOCKCHAIN_REFRESH_MS = 5000; // 5 seconds
+
+// ── State ─────────────────────────────────────────────────────────
+let adminToken = null;
+let adminUsername = 'admin';
+let tallyInterval = null;
+let blockchainInterval = null;
+let allAuditEntries = [];
+
+// ── DOM Helpers ───────────────────────────────────────────────────
+const $ = (id) => document.getElementById(id);
+const show = (el) => el && (el.style.display = '');
+const hide = (el) => el && (el.style.display = 'none');
+
+function showAlert(el, msg, type = 'error') {
+  el.className = `alert alert-${type} show`;
+  el.textContent = msg;
+}
+
+function hideAlert(el) {
+  el.className = 'alert';
+  el.textContent = '';
+}
+
+// ── Auth ──────────────────────────────────────────────────────────
+async function apiRequest(path, options = {}) {
+  const url = API_BASE + path;
+  const headers = { 'Content-Type': 'application/json', ...options.headers };
+  if (adminToken) headers['Authorization'] = `Bearer ${adminToken}`;
+
+  const res = await fetch(url, { ...options, headers });
+  const data = await res.json();
+
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || `Request failed (${res.status})`);
+  }
+  return data.data;
+}
+
+// ── Login ─────────────────────────────────────────────────────────
+$('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = $('login-btn');
+  const spinner = $('login-spinner');
+  const btnText = $('login-btn-text');
+  const alert = $('login-alert');
+
+  hideAlert(alert);
+  btn.disabled = true;
+  spinner.classList.add('show');
+  btnText.textContent = 'Signing in…';
+
+  try {
+    const username = $('admin-username').value.trim();
+    const password = $('admin-password').value;
+
+    const result = await apiRequest('/admin/login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password })
+    });
+
+    adminToken = result.token;
+    adminUsername = result.username;
+
+    // Show dashboard
+    $('login-screen').style.display = 'none';
+    const dash = $('dashboard-screen');
+    dash.classList.add('visible');
+
+    $('topbar-username').textContent = adminUsername;
+    $('topbar-user-initial').textContent = adminUsername[0].toUpperCase();
+
+    // Load initial data
+    await loadTally();
+    await loadAuditLog();
+    await loadBlockchainStatus();
+
+    // Start auto-refresh
+    tallyInterval = setInterval(loadTally, TALLY_REFRESH_MS);
+    blockchainInterval = setInterval(loadBlockchainStatus, BLOCKCHAIN_REFRESH_MS);
+
+  } catch (err) {
+    showAlert(alert, err.message || 'Login failed. Check your credentials.');
+  } finally {
+    btn.disabled = false;
+    spinner.classList.remove('show');
+    btnText.textContent = 'Sign In';
+  }
+});
+
+// ── Logout ────────────────────────────────────────────────────────
+$('logout-btn').addEventListener('click', () => {
+  clearInterval(tallyInterval);
+  clearInterval(blockchainInterval);
+  adminToken = null;
+  $('dashboard-screen').classList.remove('visible');
+  $('login-screen').style.display = '';
+  $('admin-password').value = '';
+});
+
+// ── Tab Navigation ────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+
+    // Update buttons
+    document.querySelectorAll('.tab-btn').forEach((b) => {
+      b.classList.remove('active');
+      b.setAttribute('aria-selected', 'false');
+    });
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected', 'true');
+
+    // Update panels
+    document.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
+    document.getElementById(`panel-${tab}`).classList.add('active');
+
+    // Load on-demand data
+    if (tab === 'results') renderResultsTable(lastTallyData);
+    if (tab === 'finalize') renderFinalizeStats(lastTallyData);
+  });
+});
+
+// ── Tally ─────────────────────────────────────────────────────────
+let lastTallyData = null;
+
+async function loadTally() {
+  try {
+    const data = await apiRequest('/admin/tally');
+    lastTallyData = data;
+
+    // Stats
+    $('stat-votes').textContent = data.totalVotesCast;
+    $('stat-registered').textContent = data.registeredVoters;
+    $('stat-turnout').textContent = data.turnoutPercent + '%';
+
+    if (data.isFinalized) {
+      $('stat-status').textContent = '🔒 Finalized';
+      $('stat-status').style.color = 'var(--warning)';
+      $('stat-status-sub').textContent = formatDate(data.finalizedAt);
+    } else {
+      $('stat-status').textContent = '🟢 Open';
+      $('stat-status').style.color = 'var(--success)';
+      $('stat-status-sub').textContent = 'Accepting votes';
+    }
+
+    renderOverviewTable(data);
+    renderFinalizeStats(data);
+
+    // Update active results tab too
+    if (document.getElementById('panel-results').classList.contains('active')) {
+      renderResultsTable(data);
+    }
+
+    const now = new Date().toLocaleTimeString();
+    $('overview-updated').textContent = now;
+    $('last-refresh-time').textContent = now;
+
+  } catch (err) {
+    console.warn('Tally load failed:', err.message);
+  }
+}
+
+function renderOverviewTable(data) {
+  const tbody = $('overview-tbody');
+  if (!data.results || data.results.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><div class="empty-state-icon">🗳️</div><div class="empty-state-text">No votes recorded yet.</div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.results.map((r, i) => `
+    <tr>
+      <td><strong>${i + 1}</strong></td>
+      <td>
+        <strong>${esc(r.name)}</strong>
+      </td>
+      <td><span class="badge badge-blue">${esc(r.party)}</span></td>
+      <td>${esc(r.office)}</td>
+      <td><strong>${r.votes}</strong></td>
+      <td class="bar-cell">
+        <div class="vote-bar-track">
+          <div class="vote-bar-fill" style="width:${r.percentage}%"></div>
+        </div>
+        <div class="vote-pct">${r.percentage}%</div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderResultsTable(data) {
+  if (!data) return;
+  const tbody = $('results-tbody');
+
+  if (!data.results || data.results.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-state-text">No votes recorded yet.</div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.results.map((r, i) => `
+    <tr>
+      <td><strong>#${i + 1}</strong></td>
+      <td><strong>${esc(r.name)}</strong></td>
+      <td><span class="badge badge-blue">${esc(r.party)}</span></td>
+      <td>${esc(r.office)}</td>
+      <td style="font-size:1.1rem;font-weight:700">${r.votes}</td>
+      <td>
+        <span style="font-size:1rem;font-weight:700;color:var(--accent)">${r.percentage}%</span>
+      </td>
+      <td class="bar-cell">
+        <div class="vote-bar-track" style="min-width:120px">
+          <div class="vote-bar-fill" style="width:${r.percentage}%"></div>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderFinalizeStats(data) {
+  if (!data) return;
+  $('fin-vote-count').textContent = data.totalVotesCast;
+  $('fin-turnout').textContent = data.turnoutPercent + '%';
+  $('fin-current-status').textContent = data.isFinalized ? '🔒 Finalized' : '🟢 Open';
+  $('fin-current-status').style.color = data.isFinalized ? 'var(--warning)' : 'var(--success)';
+
+  if (data.isFinalized) {
+    $('finalize-btn').disabled = true;
+    $('finalize-btn').textContent = '✓ Election Already Finalized';
+    $('finalize-result').classList.add('show');
+    $('finalize-result-title').textContent = 'Election is Finalized';
+    $('finalize-result-details').textContent = 'Finalized at: ' + formatDate(data.finalizedAt);
+  }
+}
+
+// ── Audit Log ─────────────────────────────────────────────────────
+async function loadAuditLog() {
+  try {
+    const data = await apiRequest('/admin/audit-log?limit=500');
+    allAuditEntries = data.entries || [];
+    $('audit-count-label').textContent = `${allAuditEntries.length} of ${data.total} entries`;
+    renderAuditTable(allAuditEntries);
+  } catch (err) {
+    $('audit-count-label').textContent = 'Failed to load';
+    $('audit-tbody').innerHTML = `<tr><td colspan="8" class="empty-state"><div class="empty-state-text">${esc(err.message)}</div></td></tr>`;
+  }
+}
+
+function renderAuditTable(entries) {
+  const tbody = $('audit-tbody');
+  if (!entries.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">No votes recorded yet.</div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = entries.map((e, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td style="font-family:var(--font-mono);font-size:0.75rem">${esc(e.voterId)}</td>
+      <td><strong>${esc(e.candidateName)}</strong></td>
+      <td><span class="badge badge-blue">${esc(e.candidateParty)}</span></td>
+      <td style="font-family:var(--font-mono);font-size:0.7rem">${esc(e.confirmationCode)}</td>
+      <td>
+        <span class="tx-hash-cell" title="${esc(e.txHash)}" onclick="copyTxHash('${esc(e.txHash)}', event)" tabindex="0">
+          ${truncateTx(e.txHash)}
+        </span>
+      </td>
+      <td>${e.blockNumber !== null ? e.blockNumber : '—'}</td>
+      <td style="font-size:0.75rem;white-space:nowrap">${formatDate(e.submittedAt)}</td>
+    </tr>
+  `).join('');
+}
+
+// Filter on search input
+$('audit-search').addEventListener('input', (e) => {
+  const q = e.target.value.toLowerCase();
+  if (!q) return renderAuditTable(allAuditEntries);
+  const filtered = allAuditEntries.filter((entry) =>
+    (entry.txHash || '').toLowerCase().includes(q) ||
+    (entry.candidateName || '').toLowerCase().includes(q) ||
+    (entry.confirmationCode || '').toLowerCase().includes(q) ||
+    (entry.candidateParty || '').toLowerCase().includes(q)
+  );
+  renderAuditTable(filtered);
+});
+
+$('audit-refresh-btn').addEventListener('click', loadAuditLog);
+
+function copyTxHash(hash, event) {
+  navigator.clipboard.writeText(hash).then(() => {
+    const el = event.target;
+    const orig = el.textContent;
+    el.textContent = '✓ Copied';
+    el.style.color = 'var(--success)';
+    setTimeout(() => {
+      el.textContent = orig;
+      el.style.color = '';
+    }, 1500);
+  });
+}
+
+// ── Verify by Tx Hash ─────────────────────────────────────────────
+$('verify-btn').addEventListener('click', verifyTxHash);
+$('verify-tx-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') verifyTxHash(); });
+
+async function verifyTxHash() {
+  const input = $('verify-tx-input').value.trim();
+  const alert = $('verify-alert');
+  const result = $('verify-result');
+  const btn = $('verify-btn');
+  const spinner = $('verify-spinner');
+
+  hideAlert(alert);
+  result.classList.remove('show');
+
+  if (!input) {
+    showAlert(alert, 'Please enter a transaction hash.', 'error');
+    return;
+  }
+  if (!/^0x[0-9a-fA-F]{64}$/.test(input)) {
+    showAlert(alert, 'Invalid transaction hash format. Must be 0x followed by 64 hex characters.', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  spinner.classList.add('show');
+
+  try {
+    const data = await apiRequest(`/admin/verify/${input}`);
+    $('vr-tx-hash').textContent = data.txHash;
+    $('vr-vote-hash').textContent = data.voteHash;
+    $('vr-candidate').textContent = data.candidateName;
+    $('vr-party').textContent = data.candidateParty;
+    $('vr-office').textContent = data.candidateOffice;
+    $('vr-voter-id').textContent = data.maskedVoterId;
+    $('vr-confirm-code').textContent = data.confirmationCode;
+    $('vr-block').textContent = data.blockNumber !== null ? `#${data.blockNumber}` : 'N/A';
+    $('vr-submitted-at').textContent = formatDate(data.submittedAt);
+    result.classList.add('show');
+  } catch (err) {
+    showAlert(alert, err.message || 'No vote found for this transaction hash.', 'error');
+  } finally {
+    btn.disabled = false;
+    spinner.classList.remove('show');
+  }
+}
+
+// ── Blockchain Status ─────────────────────────────────────────────
+async function loadBlockchainStatus() {
+  try {
+    const data = await apiRequest('/blockchain/status');
+
+    const badge = $('bc-connection-badge');
+    if (data.connected) {
+      badge.innerHTML = '<div class="dot dot-green"></div> Connected';
+      badge.style.color = 'var(--success)';
+    } else {
+      badge.innerHTML = '<div class="dot dot-red"></div> Disconnected';
+      badge.style.color = 'var(--danger)';
+    }
+
+    $('bc-provider').textContent = (data.provider || '—').toUpperCase();
+    $('bc-node-url').textContent = data.nodeUrl || '—';
+    $('bc-block-number').textContent = data.blockNumber !== null ? data.blockNumber : '—';
+    $('bc-network-id').textContent = data.networkId || '—';
+    $('bc-accounts').textContent = data.accountCount !== null ? data.accountCount : '—';
+    $('bc-checked-at').textContent = 'Checked: ' + formatDate(data.checkedAt);
+
+    if (data.contractAddress) {
+      $('bc-contract-status').textContent = '✓ Deployed';
+      $('bc-contract-status').style.color = 'var(--success)';
+      $('bc-contract-address').textContent = data.contractAddress;
+    } else {
+      $('bc-contract-status').textContent = '✗ Not deployed';
+      $('bc-contract-status').style.color = 'var(--danger)';
+      $('bc-contract-address').textContent = 'Run: node scripts/deploy-contract.js';
+    }
+
+    // Accounts list
+    const tbody = $('accounts-tbody');
+    if (data.accounts && data.accounts.length) {
+      tbody.innerHTML = data.accounts.map((addr, i) => `
+        <tr>
+          <td>${i}</td>
+          <td style="font-family:var(--font-mono);font-size:0.75rem">${esc(addr)}</td>
+          <td>${i === 0 ? '<span class="badge badge-blue">Deployer / Authority</span>' : '<span class="badge badge-purple">Available</span>'}</td>
+        </tr>
+      `).join('');
+    } else {
+      tbody.innerHTML = '<tr><td colspan="3" class="empty-state"><div class="empty-state-text">No accounts available. Is Ganache running?</div></td></tr>';
+    }
+
+  } catch (err) {
+    console.warn('Blockchain status failed:', err.message);
+    $('bc-connection-badge').innerHTML = '<div class="dot dot-red"></div> Error';
+    $('bc-connection-badge').style.color = 'var(--danger)';
+  }
+}
+
+// ── Finalize ──────────────────────────────────────────────────────
+$('finalize-btn').addEventListener('click', async () => {
+  const alert = $('finalize-alert');
+  const btn = $('finalize-btn');
+  const spinner = $('finalize-spinner');
+
+  hideAlert(alert);
+
+  if (!confirm('Are you absolutely sure you want to finalize the election? This action cannot be undone.')) return;
+
+  btn.disabled = true;
+  spinner.classList.add('show');
+
+  try {
+    const data = await apiRequest('/admin/finalize', { method: 'POST' });
+
+    $('finalize-result').classList.add('show');
+    $('finalize-result-title').textContent = '✓ ' + (data.message || 'Election Finalized');
+    $('finalize-result-details').textContent =
+      `Total votes sealed: ${data.totalVotesCast} | Finalized at: ${formatDate(data.finalizedAt)}` +
+      (data.contractAddress ? ` | Contract: ${data.contractAddress}` : '');
+
+    btn.disabled = true;
+    btn.textContent = '✓ Election Finalized';
+
+    // Reload tally to show finalized status
+    await loadTally();
+  } catch (err) {
+    showAlert(alert, err.message || 'Finalization failed.', 'error');
+    btn.disabled = false;
+  } finally {
+    spinner.classList.remove('show');
+  }
+});
+
+// ── Utilities ─────────────────────────────────────────────────────
+function esc(str) {
+  if (!str) return '—';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function truncateTx(hash) {
+  if (!hash) return '—';
+  if (hash.length <= 20) return hash;
+  return hash.slice(0, 10) + '…' + hash.slice(-8);
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  try {
+    return new Date(iso).toLocaleString();
+  } catch {
+    return iso;
+  }
+}
+</script>
+
+</body>
+</html>
